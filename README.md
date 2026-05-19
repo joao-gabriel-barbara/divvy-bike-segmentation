@@ -6,15 +6,40 @@
 
 ---
 
-## 📋 Contexto de negócio
+## 📌 Visão geral
 
-A **Divvy** é o sistema de bicicletas compartilhadas de Chicago, operado pela Lyft, com milhares de bikes distribuídas por centenas de estações na cidade. O sistema atende dois perfis declarados: **membros** (assinatura anual) e **casuais** (passes diários ou por viagem).
+A Divvy usa uma separação de usuários bem comum e muito utilizada nas empresas, sendo membro e casual. Membros usam mais durante a semana; casuais, nos fins de semana. Não é uma distinção errada, mas também não é precisa o suficiente para tomar decisões.
 
-A simples divisão entre membro e casual, porém, não é suficiente para decisões operacionais e de marketing. Este projeto responde a três perguntas de negócio centrais:
+Um morador que usa o plano casual no fim de semana e um turista pedalando 90 minutos são tratados como iguais, por conta da distinção de membro e casual. Isso só gera campanhas de marketing genéricas sem uma conversão real de usuários e distribuição de bikes mal alocadas.
 
-1. **Onde** se concentra o uso do sistema e como isso varia por perfil de usuário?
-2. **Como** membros e casuais diferem em comportamento de uso — horário, duração e frequência?
-3. **Quais** estações e períodos apresentam maior pressão sobre a frota, gerando risco de falta ou excesso de bikes?
+Analisando cerca de 6 milhões de viagens entre 2025 e 2026, foi encontrado que existem, na realidade, quatro tipos de usuários — sendo a divisão mais importante, sazonalidade vs. intenção de uso.
+
+| Cluster | Perfil | Característica principal |
+|---|---|---|
+| 🚴 Explorador de FDS no Verão | Fins de semana, verão | Candidato ideal à conversão para membro |
+| 💼 Commuter de Verão | Dias úteis, picos 8h e 17h | Demanda previsível, precisa de oferta garantida |
+| 🗺️ Turista/Aventureiro de Verão | 90 min medianos, 80% casual | Não vai virar membro — produto diferente |
+| ❄️ Trabalhador do Inverno | Pedala quando os outros somem | O mais leal — merece fidelização |
+
+Tratar usuários apenas como membros e casuais causa uma alocação errada de recursos. Ignorar o Trabalhador do Inverno é perder o tipo de usuário mais leal. Agora que sabemos quais são os verdadeiros usuários, podemos definir quais são as prioridades para a empresa.
+
+A seguir, os detalhes metodológicos e os resultados completos da análise.
+
+---
+
+## 💡 Recomendações de negócio
+
+**Cluster 0 — Explorador de FDS no Verão**
+Redistribuir bikes para estações próximas a parques e à orla do lago Michigan nos fins de semana de junho a agosto, período de maior concentração desse perfil.
+
+**Cluster 1 — Commuter de Verão**
+Garantir disponibilidade de bikes — preferencialmente elétricas — nas estações de maior fluxo em dias úteis de verão, especialmente nos picos das 8h e 17–18h, para atender o deslocamento casa-trabalho sem ruptura de oferta.
+
+**Cluster 2 — Turista/Aventureiro de Verão**
+Com 80% de usuários casuais e duração mediana de 90 minutos, este cluster representa a maior oportunidade de conversão para membro. Recomenda-se criar passes de verão ou planos de curta duração direcionados a esse perfil.
+
+**Cluster 3 — Trabalhador do Inverno**
+É o cluster mais leal do sistema — pedala quando os outros somem. Merece programa de fidelização com benefícios exclusivos para membros ativos no período frio, como desconto na renovação anual ou upgrades de plano.
 
 ---
 
@@ -93,9 +118,7 @@ Número de clusters definido pelo **Elbow Method** (K=2 a K=10). A inflexão mai
 
 ![Clusters PCA](charts/clusters_pca_v3.png)
 
----
-
-## 🏷️ Perfis identificados
+### Perfis identificados
 
 | Cluster | Nome | Viagens | Duration mediana | Hora mediana | Dia mediano | Mês mediano | % Casual |
 |---|---|---|---|---|---|---|---|
@@ -105,22 +128,6 @@ Número de clusters definido pelo **Elbow Method** (K=2 a K=10). A inflexão mai
 | 3 | Trabalhador do Inverno | 1.833.354 | 7,9 min | 14h | Quarta | Março | 25% |
 
 **Insight central:** o sistema Divvy tem dois eixos de segmentação — sazonalidade e intenção de uso. Ignorar a sazonalidade leva a decisões operacionais equivocadas: o mesmo usuário casual se comporta de forma completamente diferente em julho e em março.
-
----
-
-## 💡 Recomendações de negócio
-
-**Cluster 0 — Explorador de FDS no Verão**
-Redistribuir bikes para estações próximas a parques e à orla do lago Michigan nos fins de semana de junho a agosto, período de maior concentração desse perfil.
-
-**Cluster 1 — Commuter de Verão**
-Garantir disponibilidade de bikes — preferencialmente elétricas — nas estações de maior fluxo em dias úteis de verão, especialmente nos picos das 8h e 17–18h, para atender o deslocamento casa-trabalho sem ruptura de oferta.
-
-**Cluster 2 — Turista/Aventureiro de Verão**
-Com 80% de usuários casuais e duração mediana de 90 minutos, este cluster representa a maior oportunidade de conversão para membro. Recomenda-se criar passes de verão ou planos de curta duração direcionados a esse perfil.
-
-**Cluster 3 — Trabalhador do Inverno**
-É o cluster mais leal do sistema — pedala quando os outros somem. Merece programa de fidelização com benefícios exclusivos para membros ativos no período frio, como desconto na renovação anual ou upgrades de plano.
 
 ---
 
@@ -137,11 +144,10 @@ pip install pandas matplotlib seaborn scikit-learn jupyter
 ```
 divvy-bike/
 │
-├── charts/← imagens geradas
+├── charts/           ← imagens geradas
 │
 ├── data/
-│   ├── raw/              ← CSVs originais da Divvy (não versionados)
-│   
+│   ├── raw/          ← CSVs originais da Divvy (não versionados)
 │
 ├── notebooks/
 │   ├── divvy_analysis.ipynb
